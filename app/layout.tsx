@@ -4,12 +4,19 @@ import Footer from '../components/Footer/Footer';
 import {  ReactNode } from 'react';
 import TanStackProvider from '../components/TanStackProvider/TanStackProvider';
 
-interface RootLayoutProps {
-  children: ReactNode;
-  modal: ReactNode;
-}
+// interface RootLayoutProps {
+//   children: ReactNode;
+//   modal: ReactNode;
+// }
 
-export default function RootLayout({ children, modal }: RootLayoutProps) {
+
+export default function RootLayout({
+  children,
+  modal,
+}: {
+  children: ReactNode
+  modal: ReactNode
+}) {
   return (
     <html lang="uk">
       <body suppressHydrationWarning>
@@ -21,5 +28,5 @@ export default function RootLayout({ children, modal }: RootLayoutProps) {
         </TanStackProvider>
       </body>
     </html>
-  );
+  )
 }
