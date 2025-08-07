@@ -3,14 +3,15 @@ import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Modal from '../../../../components/Modal/Modal';
 import NotePreview from '../../../../components/NotePreview/NotePreview';
-import styles from '../../NotesLayout.module.css';
+import styles from '../../../../app/notes/NotesLayout.module.css';
 
 
 export default function NotePreviewModal() {
   const router = useRouter();
-  const params = useParams();
-  const rawId = params.id;
-  
+  const  params = useParams();
+  const id = params.id as string;
+  const rawId = id;
+
   const noteId = Array.isArray(rawId) ? rawId[0] : rawId;
 
   if (!noteId) return null;
