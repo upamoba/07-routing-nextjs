@@ -4,11 +4,6 @@ import Footer from '../components/Footer/Footer';
 import {  ReactNode } from 'react';
 import TanStackProvider from '../components/TanStackProvider/TanStackProvider';
 
-// interface RootLayoutProps {
-//   children: ReactNode;
-//   modal: ReactNode;
-// }
-
 
 export default function RootLayout({
   children,
