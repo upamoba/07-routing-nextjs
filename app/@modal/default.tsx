@@ -1,11 +1,5 @@
-'use client';
 
-import { PropsWithChildren, ReactNode } from 'react';
+export default function ModalLayout() {
 
-interface ModalLayoutProps {
-  children?: ReactNode;
-}
-export default function ModalLayout({ children }: PropsWithChildren<ModalLayoutProps>) {
-  if (!children) return null;
-  return <>{children}</>;
+  return null;
 }

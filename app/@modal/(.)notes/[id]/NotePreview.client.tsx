@@ -15,17 +15,18 @@ export default function NotePreviewModal() {
   const router = useRouter();
   const params = useParams();
   const raw = params.id;
-  const rawId = Array.isArray(raw) ? raw[0] : raw;
-  // const rawId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const noteId = Array.isArray(raw) ? raw[0] : raw;
+  
   
 
    const { data: note, isLoading, isError } = useQuery<Note, Error>({
-    queryKey: ['note', rawId],
-    queryFn: () => fetchNoteById(rawId!),
-    enabled: !!rawId,
+    queryKey: ['note', noteId],
+    queryFn: () => fetchNoteById(noteId!),
+   enabled: !!noteId,
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
-   if (!rawId){ return null; }
+   if (!noteId){ return null; }
 
   return (
     <Modal onClose={() => router.back()}>
