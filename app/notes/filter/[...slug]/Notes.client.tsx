@@ -36,8 +36,7 @@ const NotesClient: FC<NotesClientProps> = ({ initialState, filterTag }) => {
 
   const client = new QueryClient()
   hydrate(client, initialState)
-  // const restoredClient = new QueryClient()
-  // hydrate(restoredClient, initialState)
+  
 
   const {
     data = { data: [], totalPages: 1, page, perPage: 12 },

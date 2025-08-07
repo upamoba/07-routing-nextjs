@@ -5,15 +5,15 @@ import NotesClient from './Notes.client'
 import type { DehydratedState } from '@tanstack/react-query'
 
 type PageProps = {
-  params: {
+  params: Promise< {
     slug?: string[]
-  }
+  }>
 }
 
 export default async function FilteredNotesPage({ params }: PageProps) {
 
-  const tag = params.slug?.[0] ?? ''
-
+  const {slug} = await params
+const tag = Array.isArray(slug) && slug.length > 0 ? slug[0] : ''
   const qc = new QueryClient()
   await qc.prefetchQuery({
   queryKey: ['notes', 1, tag],
