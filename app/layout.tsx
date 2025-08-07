@@ -1,16 +1,23 @@
 import './globals.css';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, ReactNode } from 'react';
 import TanStackProvider from '../components/TanStackProvider/TanStackProvider';
 
-  export default function RootLayout({ children }: PropsWithChildren) {
+interface RootLayoutProps {
+  children: ReactNode;
+  modal?: ReactNode;
+}
+
+export default function RootLayout({ children, modal }: PropsWithChildren<RootLayoutProps>) {
   return (
     <html lang="uk">
       <body suppressHydrationWarning>
         <TanStackProvider>
           <Header />
           {children}
+          {modal}
+
           <Footer />
         </TanStackProvider>
       </body>
