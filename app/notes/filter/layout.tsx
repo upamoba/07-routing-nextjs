@@ -1,20 +1,22 @@
 // 'use client';
 
 
-import React from 'react';
-import styles from './FilterLayout.module.css';
+import { ReactNode } from 'react'
+import styles from './FilterLayout.module.css'
 
-export default function NotesLayout({
+interface FilterLayoutProps {
+  children: ReactNode
+  sidebar: ReactNode
+}
+
+export default function FilterLayout({
   children,
-  preview,
-}: {
-  children: React.ReactNode;
-  preview: React.ReactNode;
-}) {
+  sidebar,
+}: FilterLayoutProps) {
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.listArea}>{children}</div>
-      {preview && <div className={styles.previewContainer}>{preview}</div>}
+    <div className={styles.container}>
+      <aside className={styles.sidebar}>{sidebar}</aside>
+      <section className={styles.content}>{children}</section>
     </div>
-  );
+  )
 }
