@@ -1,9 +1,10 @@
 'use client';
 import React, { FC, useState, useEffect } from 'react';
-import {keepPreviousData,useQuery } from '@tanstack/react-query';
+import {keepPreviousData,useQuery,QueryClient,hydrate } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
-import type { FetchNotesResponse } from '../../../../lib/api';
-import { fetchNotes } from '../../../../lib/api';
+import type { DehydratedState } from '@tanstack/react-query'
+
+import { fetchNotes, FetchNotesResponse } from '../../../../lib/api';
 import SearchBox from '../../../../components/SearchBox/SearchBox';
 import Pagination from '../../../../components/Pagination/Pagination';
 import NoteList from '../../../../components/NoteList/NoteList';
@@ -13,61 +14,63 @@ import { LoadingIndicator } from '../../../../components/LoadingIndicator/Loadin
 import { ErrorMessage } from '../../../../components/ErrorMessage/ErrorMessage';
 import { EmptyState } from '../../../../components/EmptyState/EmptyState';
 import styles from './NotesPage.module.css';
-import { NoteTag } from '@/types/note';
 
-export interface NotesClientProps {
-  initialData: FetchNotesResponse;
-  tag: NoteTag | 'All';           
+
+
+
+interface NotesClientProps {
+  initialState: DehydratedState
+  filterTag?: string
 }
 
-const NotesClient: FC<NotesClientProps> = ({ initialData, tag }) => {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState<string>('');      
-  const [debouncedSearch] = useDebounce(search, 500);
-  const [isModalOpen, setModalOpen] = useState(false);
+const NotesClient: FC<NotesClientProps> = ({ initialState, filterTag }) => {
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState(filterTag ?? '')
+  const [debounced] = useDebounce(search, 500)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
- 
+  
   useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, tag]);
+    setPage(1)
+  }, [debounced])
 
-  const { data, isLoading, isError } = useQuery<FetchNotesResponse, Error>({
-    queryKey: ['notes', tag, page, debouncedSearch],
-    queryFn: () =>
-      fetchNotes({
-        page,
-        perPage: 12,
-        search: debouncedSearch,
-        tag: tag === 'All' ? undefined : tag, 
-      }),
-    initialData:
-      page === 1 && debouncedSearch === '' && tag === 'All'
-        ? initialData
+  const client = new QueryClient()
+  hydrate(client, initialState)
+  // const restoredClient = new QueryClient()
+  // hydrate(restoredClient, initialState)
+
+  const {
+    data = { data: [], totalPages: 1, page, perPage: 12 },
+    isLoading,
+    isError,
+  } = useQuery<FetchNotesResponse, Error>({
+    queryKey: ['notes', page, debounced],
+    queryFn: () => fetchNotes({ page, perPage: 12, search: debounced }),
+   
+     initialData:
+      page === 1 && debounced === (filterTag ?? '')
+        ? () =>
+            client.getQueryData<FetchNotesResponse>([
+              'notes',
+              1,
+              filterTag ?? '',
+            ])
         : undefined,
-    placeholderData: keepPreviousData
-  });
-
-  const notes = data?.data ?? [];
-  const totalPages = data?.totalPages ?? 1;
+   placeholderData: keepPreviousData
+  })
 
   return (
     <div className={styles.app}>
       <div className={styles.toolbar}>
-        <SearchBox
-          value={search}
-          onChange={(val) => setSearch(val)}
-        />
-        {totalPages > 1 && (
+        <SearchBox value={search} onChange={setSearch} />
+        {data.totalPages > 1 && (
           <Pagination
-            totalPages={totalPages}
+            totalPages={data.totalPages}
             activePage={page}
             onPageChange={setPage}
           />
         )}
-        <button
-          className={styles.button}
-          onClick={() => setModalOpen(true)}
-        >
+        <button className={styles.button} onClick={() => setIsModalOpen(true)}>
           Create note +
         </button>
       </div>
@@ -75,88 +78,19 @@ const NotesClient: FC<NotesClientProps> = ({ initialData, tag }) => {
       {isLoading && <LoadingIndicator />}
       {isError && <ErrorMessage />}
 
-      {!isLoading && notes.length > 0 ? (
-        <NoteList notes={notes} />
+      {!isLoading && data.data.length > 0 ? (
+        <NoteList notes={data.data} />
       ) : (
         !isLoading && <EmptyState message="No notes found." />
       )}
 
       {isModalOpen && (
-        <Modal onClose={() => setModalOpen(false)}>
-          <NoteForm onClose={() => setModalOpen(false)} />
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <NoteForm onClose={() => setIsModalOpen(false)} />
         </Modal>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default NotesClient;
-
-// export interface NotesClientProps {
-//   initialData: FetchNotesResponse;
-//   tag: NoteTag;
-// }
-
-// const NotesClient: FC<NotesClientProps> = ({ initialData, tag }) => {
-//   const [page, setPage] = useState(1);
-//   const [search, setSearch] = useState<string>('');
-//   const [debounced] = useDebounce(search, 500);
-//   const [open, setOpen] = useState(false);
-
-//   useEffect(() => {
-//     setPage(1);
-//   }, [debounced]);
-
-// const { data, isLoading, isError } = useQuery<
-//   FetchNotesResponse,
-//   Error,
-//   FetchNotesResponse,
-//   [ 'notes', number, string ]
-// >({
-//   queryKey: ['notes', page, debounced],
-//   queryFn: () => fetchNotes({ page, perPage: 12, search: debounced }),
-//   initialData:
-//     page === 1 && debounced === (tag ?? '')
-//       ? (initialData as FetchNotesResponse)
-//       : undefined,
-//   placeholderData: keepPreviousData,
-// });
-
-//   const notes = data?.data ?? [];
-//   const totalPages = data?.totalPages ?? 1;
-
-//   return (
-//     <div className={styles.app}>
-//       <div className={styles.toolbar}>
-//         <SearchBox
-//           value={search}
-//           onChange={(value: string) => setSearch(value)}
-//         />
-
-//         {totalPages > 1 && (
-//           <Pagination totalPages={totalPages} activePage={page} onPageChange={setPage} />
-//         )}
-//         <button className={styles.button} onClick={() => setOpen(true)}>
-//           Create note +
-//         </button>
-//       </div>
-
-//       {isLoading && <LoadingIndicator />}
-//       {isError && <ErrorMessage />}
-
-//       {!isLoading && notes.length > 0 ? (
-//         <NoteList notes={notes} />
-//       ) : (
-//         !isLoading && <EmptyState message="No notes found." />
-//       )}
-
-//       {open && (
-//         <Modal onClose={() => setOpen(false)}>
-//           <NoteForm onClose={() => setOpen(false)} />
-//         </Modal>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default NotesClient;
+export default NotesClient
