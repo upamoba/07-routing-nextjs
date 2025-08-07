@@ -1,19 +1,17 @@
 'use client';
 
-import { 
-  // PropsWithChildren, 
-  ReactNode } from 'react';
+import { ReactNode } from 'react';
 import styles from './FilterLayout.module.css';
 
-type FilterLayoutProps = {
+type LayoutProps = {
 children: ReactNode
-  sidebar: ReactNode;
+  preview: ReactNode;
 };
 
-export default function FilterLayout({ children, sidebar }: FilterLayoutProps) {
+export default function FilterLayout({ children, preview }: LayoutProps) {
    return (
     <div className={styles.container}>
-      <aside className={styles.sidebar}>{sidebar}</aside>
+      <aside className={styles.sidebar}>{preview}</aside>
       <section className={styles.content}>{children}</section>
     </div>
   );
