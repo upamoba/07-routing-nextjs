@@ -11,7 +11,7 @@ interface FilterLayoutProps {
 
 export default function FilterLayout({
   children,
-  sidebar,
+  sidebar
 }: FilterLayoutProps) {
   return (
     <div className={styles.container}>
