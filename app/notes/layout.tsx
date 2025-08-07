@@ -3,17 +3,27 @@ import type { ReactNode } from 'react'
 import styles from './NotesLayout.module.css';
 
 
-interface NotesLayout {
-  children: ReactNode       
-  preview: ReactNode       
+interface NotesLayoutProps {
+  children: ReactNode
+  sidebar: ReactNode
+  modal: ReactNode
 }
-export default function NotesLayout({ children, preview }: { children: React.ReactNode; preview: React.ReactNode }) 
-// export default function NotesLayout({ children, preview }: NotesLayoutProps) 
-{
+
+export default function NotesLayout({
+  children,
+  sidebar,
+  modal,
+}: NotesLayoutProps) {
   return (
     <div className={styles.wrapper}>
-      <div className={styles.listArea}>{children}</div>
-      {preview && <div className={styles.previewContainer}>{preview}</div>}
+   
+      <aside className={styles.sidebar}>{sidebar}</aside>
+
+     
+      <section className={styles.content}>{children}</section>
+
+    
+      {modal}
     </div>
   )
 }
