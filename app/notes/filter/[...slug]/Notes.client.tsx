@@ -1,10 +1,9 @@
 'use client';
 import React, { FC, useState, useEffect } from 'react';
-import {keepPreviousData,useQuery,QueryClient,hydrate } from '@tanstack/react-query';
+import {keepPreviousData,useQuery } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
-import type { DehydratedState } from '@tanstack/react-query'
-
-import { fetchNotes, FetchNotesResponse } from '../../../../lib/api';
+import type { FetchNotesResponse } from '../../../../lib/api'
+import { fetchNotes } from '../../../../lib/api';
 import SearchBox from '../../../../components/SearchBox/SearchBox';
 import Pagination from '../../../../components/Pagination/Pagination';
 import NoteList from '../../../../components/NoteList/NoteList';
@@ -19,52 +18,45 @@ import styles from './NotesPage.module.css';
 
 
 interface NotesClientProps {
-  initialState: DehydratedState
+  initialData: FetchNotesResponse 
   filterTag?: string
 }
 
-const NotesClient: FC<NotesClientProps> = ({ initialState, filterTag }) => {
+const NotesClient: FC<NotesClientProps> = ({ initialData, filterTag }) => {
   const [page, setPage] = useState(1)
-  const [search, setSearch] = useState(filterTag ?? '')
-  const [debounced] = useDebounce(search, 500)
+  const [search, setSearch] = useState('')
+  const [debouncedSearch] = useDebounce(search, 500)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   
   useEffect(() => {
     setPage(1)
-  }, [debounced])
+  }, [debouncedSearch, filterTag])
 
-  const client = new QueryClient()
-  hydrate(client, initialState)
+   const effectiveSearch = filterTag ? filterTag : debouncedSearch
+ 
   
 
-  const {
-    data = { data: [], totalPages: 1, page, perPage: 12 },
-    isLoading,
-    isError,
-  } = useQuery<FetchNotesResponse, Error>({
-    queryKey: ['notes', page, debounced],
-    queryFn: () => fetchNotes({ page, perPage: 12, search: debounced }),
-   
-     initialData:
-      page === 1 && debounced === (filterTag ?? '')
-        ? () =>
-            client.getQueryData<FetchNotesResponse>([
-              'notes',
-              1,
-              filterTag ?? '',
-            ])
-        : undefined,
-   placeholderData: keepPreviousData
+  const {data,isLoading,isError,} = useQuery<FetchNotesResponse, Error>({
+    queryKey: ['notes', page, effectiveSearch],
+    queryFn: () => fetchNotes({ page, perPage: 12, search: effectiveSearch }),
+    initialData: page === 1 && filterTag !== undefined ? initialData : undefined,
+    placeholderData: keepPreviousData
   })
+const notes = data?.data ?? []
+  const totalPages = data?.totalPages ?? 1
 
   return (
     <div className={styles.app}>
       <div className={styles.toolbar}>
-        <SearchBox value={search} onChange={setSearch} />
-        {data.totalPages > 1 && (
+        <SearchBox 
+          value={search} 
+           onChange={val => {
+            setSearch(val)
+          }} />
+        {totalPages > 1 && (
           <Pagination
-            totalPages={data.totalPages}
+            totalPages={totalPages}
             activePage={page}
             onPageChange={setPage}
           />
@@ -77,8 +69,8 @@ const NotesClient: FC<NotesClientProps> = ({ initialState, filterTag }) => {
       {isLoading && <LoadingIndicator />}
       {isError && <ErrorMessage />}
 
-      {!isLoading && data.data.length > 0 ? (
-        <NoteList notes={data.data} />
+      {!isLoading && notes.length > 0 ? (
+        <NoteList notes={notes} />
       ) : (
         !isLoading && <EmptyState message="No notes found." />
       )}
