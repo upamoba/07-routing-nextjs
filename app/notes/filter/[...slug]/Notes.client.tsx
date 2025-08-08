@@ -30,17 +30,17 @@ const NotesClient: FC<NotesClientProps> = ({ initialData , filterTag }) => {
 
   
   useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch, filterTag])
+    setPage(1);
+  }, [debouncedSearch]);
 
-   const effectiveSearch = filterTag ? filterTag : debouncedSearch
+   const effectiveSearch = filterTag !== '' ? filterTag : debouncedSearch;
  
   
 
   const {data,isLoading,isError,} = useQuery<FetchNotesResponse, Error>({
     queryKey: ['notes', page, effectiveSearch],
     queryFn: () => fetchNotes({ page, perPage: 12, search: effectiveSearch }),
-    initialData: page === 1 && filterTag !== undefined ? initialData : undefined,
+    initialData: page === 1  ? initialData : undefined,
     placeholderData: keepPreviousData
   })
 const notes = data?.data ?? []
