@@ -22,7 +22,7 @@ interface NotesClientProps {
   filterTag?: string
 }
 
-const NotesClient: FC<NotesClientProps> = ({ initialData, filterTag }) => {
+const NotesClient: FC<NotesClientProps> = ({ initialData , filterTag }) => {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [debouncedSearch] = useDebounce(search, 500)
