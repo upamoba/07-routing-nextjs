@@ -13,13 +13,14 @@ import { LoadingIndicator } from '../../../../components/LoadingIndicator/Loadin
 import { ErrorMessage } from '../../../../components/ErrorMessage/ErrorMessage';
 import { EmptyState } from '../../../../components/EmptyState/EmptyState';
 import styles from './NotesPage.module.css';
+import { FilterTag } from '@/types/note';
 
 
 
 
 interface NotesClientProps {
-  initialData: FetchNotesResponse 
-  filterTag?: string
+  initialData: FetchNotesResponse
+  filterTag?: FilterTag
 }
 
 const NotesClient: FC<NotesClientProps> = ({ initialData , filterTag }) => {
@@ -31,15 +32,14 @@ const NotesClient: FC<NotesClientProps> = ({ initialData , filterTag }) => {
   
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, filterTag]);
 
-   const effectiveSearch = filterTag !== '' ? filterTag : debouncedSearch;
- 
+  
   
 
   const {data,isLoading,isError,} = useQuery<FetchNotesResponse, Error>({
-    queryKey: ['notes', page, effectiveSearch],
-    queryFn: () => fetchNotes({ page, perPage: 12, search: effectiveSearch }),
+    queryKey: ['notes', page, filterTag ?? '', debouncedSearch],
+    queryFn: () => fetchNotes({ page, perPage: 12, search: debouncedSearch || undefined, tag: filterTag }),
     initialData: page === 1  ? initialData : undefined,
     placeholderData: keepPreviousData
   })
