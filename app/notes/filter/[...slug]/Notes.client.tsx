@@ -38,7 +38,7 @@ const NotesClient: FC<NotesClientProps> = ({ initialData , filterTag }) => {
   
 
   const {data,isLoading,isError,} = useQuery<FetchNotesResponse, Error>({
-    queryKey: ['notes', page, filterTag ?? '', debouncedSearch],
+    queryKey: ['notes', page, filterTag ?? 'All', debouncedSearch],
     queryFn: () => fetchNotes({ page, perPage: 12, search: debouncedSearch || undefined, tag: filterTag }),
     initialData: page === 1  ? initialData : undefined,
     placeholderData: keepPreviousData

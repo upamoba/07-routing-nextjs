@@ -7,26 +7,25 @@ import NotesClient from './Notes.client'
 
 type PageProps = {
   params: Promise< {
-    slug?: string[]
+    slug: string[]
   }>
 }
-const asFilterTag = (v?: string): FilterTag | undefined => {
-  if (!v) return undefined;
-  const allowed: FilterTag[] = ['All', 'Todo', 'Work', 'Personal', 'Meeting', 'Shopping'];
-  return allowed.includes(v as FilterTag) ? (v as FilterTag) : undefined;
-};
+const ALLOWED = ['All','Todo','Work','Personal','Meeting','Shopping'] as const;
+const asFilterTag = (v?: string): FilterTag | undefined =>
+  v && (ALLOWED as readonly string[]).includes(v) ? (v as FilterTag) : undefined;
+
 
 export default async function FilteredNotesPage({ params }: PageProps) {
 
   const {slug} = await params
-   const filterTag: FilterTag | undefined = asFilterTag(slug?.[0]);
+   const filterTag = asFilterTag(slug?.[0]);
 const tag = Array.isArray(slug) && slug.length > 0 ? slug[0] : ''
   const qc = new QueryClient()
   await qc.prefetchQuery({
   queryKey: ['notes', 1, tag],
   queryFn: () => fetchNotes({ page: 1, perPage: 12, search: tag, tag: filterTag }),
 })
-const initialData = await fetchNotes({ page:1, perPage:12, tag: filterTag });
-// const initialData = qc.getQueryData<FetchNotesResponse>(['notes',1,tag])!
+const initialData = await fetchNotes({ page:1, perPage:12, tag: filterTag,search:'' });
+
   return <NotesClient initialData={initialData} filterTag={filterTag} />
 }
